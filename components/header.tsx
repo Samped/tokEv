@@ -1,3 +1,6 @@
+'use client'
+
+import { ethers } from 'ethers'
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
@@ -5,6 +8,11 @@ import logo from "../public/logo.png"
 import { AiOutlineSearch } from "react-icons/ai"
 import { CgProfile } from 'react-icons/cg'
 import { MdOutlineAccountBalanceWallet } from 'react-icons/md'
+import { useEffect, useState} from 'react'
+import Web3 from 'web3'
+
+
+declare const window: any
 
 const style = {
   wrapper:`bg-[#04111d] w-screen px-[1.2rem] py-[0.8rem] flex fixed top-0 z-50`,
@@ -15,10 +23,26 @@ const style = {
   searchInput: `h-[2.6rem] w-full border-0 bg-transparent outline-0 ring-0 px-2 pl-0 text-[#e6e8eb] placeholder:text-[#8a939b]`,
   headerItems: ` flex items-center justify-end`,
   headerItem: `text-white px-4 font-bold text-[#c8cacd] hover:text-white cursor-pointer`,
-  headerIcon: `text-[#8a939b] text-3xl font-black px-4 hover:text-white cursor-pointer`,
+  headerIcon: `text-[#8a939b] text-3xl font-black px-4 hover:text-white cursor-pointer flex items-center`,
+  walletconnect: `ml-[0.5rem] text-[#8a939b] font-bold text-2xl font-black hover:text-white`,
+  walletaddress : `ml-[0.8rem] text-white font-medium text-base flex items-center`
 }
 
-const Header = () => {
+interface NavBarProps {
+  account: string | null;
+  setAccount: React.Dispatch<React.SetStateAction<string | null>>;
+}
+
+const Header: React.FC<NavBarProps>  = ({ account, setAccount}) => {
+    const connectHandler = async () => {
+      if (typeof window !== 'undefined' && typeof window.ethereum !== 'undefined'){
+        window.ethereum.request({ method: 'eth_requestAccounts'})
+        const web3instance = new Web3(window.ethereum)
+        const accounts = await web3instance.eth.getAccounts()
+        setAccount(accounts[0])
+    }
+   
+  }
   return (
     <div className={style.wrapper}>
       <Link href="/">
@@ -36,52 +60,31 @@ const Header = () => {
         />
       </div>
       <div className={style.headerItems}>
-        <Link href='/events'>
-        <div className={style.headerItem}> Events </div>
-        </Link>
-        <div className={style.headerItem}> Events </div>
-        <div className={style.headerItem}> Events </div>
-        <div className={style.headerItem}> Events </div>
-        <div className={style.headerIcon}>
+      <div>
+        {account ? (
+          <button type="button"
+          className={style.walletaddress}
+          >
+          <div className={style.headerIcon}>
           <CgProfile/>
         </div>
-        <div className={style.headerIcon}>
+            {account.slice(0,6)+'...'+ account.slice(38, 42)}
+          </button>
+        ) : (
+          <button
+            type='button'
+            className={style.headerIcon}
+            onClick={connectHandler}
+            >
           <MdOutlineAccountBalanceWallet/>
-
-        </div>
+          <span className={style.walletconnect}>
+          Connect
+          </span>
+            </button>
+        )}
+      </div>
       </div>
     </div>
-    // <div className={style.wrapper}>
-    //   <Link href="/">
-    //     <div className={style.logoContainer}>
-    //       <Image src={openseaLogo} height={40} width={40} />
-    //       <div className={style.logoText}>Opensea</div>
-    //     </div>
-    //   </Link>
-    //   <div className={style.searchBar}>
-    //     <div className={style.searchIcon}>
-    //       <AiOutlineSearch />
-    //     </div>
-    //     <input
-    //       className={style.searchInput}
-    //       placeholder="Search items, collections, and accounts"
-    //     />
-    //   </div>
-    //   <div className={style.headerItems}>
-    //     <Link href="/collections/0x66a576A977b7Bccf510630E0aA5e450EC11361Fa">
-    //       <div className={style.headerItem}> Collections </div>
-    //     </Link>
-    //     <div className={style.headerItem}> Stats </div>
-    //     <div className={style.headerItem}> Resources </div>
-    //     <div className={style.headerItem}> Create </div>
-    //     <div className={style.headerIcon}>
-    //       <CgProfile />
-    //     </div>
-    //     <div className={style.headerIcon}>
-    //       <MdOutlineAccountBalanceWallet />
-    //     </div>
-    //   </div>
-    // </div>
   )
 }
 
