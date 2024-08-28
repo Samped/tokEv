@@ -1,4 +1,5 @@
 const { expect } = require("chai");
+const { ethers } = require("hardhat");
 
 const NAME = "Concert"
 const SYMBOL = "Con"
@@ -104,12 +105,13 @@ describe("EventTicketing", () => {
     
     describe("Withdrawing", () => {
       const ID = 1
-      const SEAT = 50
-      const AMOUNT = ethers.parseUnits("1", 'ether')
+      const SEAT = 51
+      const AMOUNT = ethers.parseUnits('1', 'ether')
       let balanceBefore
 
       beforeEach(async () => {
-        balanceBefore =  deployer.provider.getBalance(deployer.address);
+        balanceBefore =   await ethers.provider.getBalance(deployer.address);
+        console.log(`balanceBefore is ${balanceBefore}`);
         let transaction = await eventTickering.connect(buyer).mint(ID, SEAT, { value: AMOUNT})
         await transaction.wait()
 
@@ -118,8 +120,10 @@ describe("EventTicketing", () => {
       })
 
       it("Update the owner balance", async () => {
-        const balanceAfter = deployer.provider.getBalance(deployer.address);
+        const balanceAfter = await ethers.provider.getBalance(deployer.address);
+        console.log(`balanceBefore is ${balanceAfter}`);
         expect(balanceAfter).to.be.greaterThan(balanceBefore)
+        console.log(`balanceBefore is ${balanceBefore} and balanceAfter is ${balanceAfter}`);
       })
 
       it("Update the contract balance", async () => {
