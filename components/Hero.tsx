@@ -1,32 +1,98 @@
-import React from 'react'
-import Link from 'next/link'
-
-const style = {
-    background: `flex bg-black h-screen relative justify-center flex-wrap items-center `,
-    ctaContainer: `flex`,
-    accentedButton: ` relative text-lg font-semibold px-10 py-4 bg-[#2181e2] rounded-lg mr-5 text-white hover:bg-[#42a0ff] cursor-pointer`,
-    button: ` relative text-lg font-semibold px-10 py-4 bg-[#363840] rounded-lg mr-5 text-[#e4e8ea] hover:bg-[#4c505c] cursor-pointer`,
-    h1: `relative text-white text-[46px] font-bold`,
-    p: `text-[#8a939b] container-[400px] text-2xl mt-[0.8rem] mb-[2.5rem]`,
-    textwrap: `white`
-
-}
+import React from "react";
+import Link from "next/link";
+import styled from "styled-components";
+import Image from "next/image";
+import bgImage from "../public/bgImage2.jpg";
 
 const Hero = () => {
-    return (
-        <div className={style.background}>
-            <div className={style.textwrap}>
-                <h1 className={style.h1}>Lorem ipsum dolor sit amet, consectetur adipiscing elit.<br /> Curabitur gravida lacus mauris,</h1>
-                <p className={style.p}>This is some dummy text for the hero section.</p>
-            <div className={style.ctaContainer}>
-            <Link href="/events">
-              <button className={style.accentedButton}>Explore</button>
-            </Link>
-              <button className={style.button}>Create</button>
-            </div>
-            </div>
-        </div>
-    )
-}
+  return (
+    <Background>
+      <TextWrap>
+        <H1>Welcome to tokEv!</H1>
+        <P>
+          We're revolutionizing the ways important occurences are documented.
+          Tokenize your events, or whatever is happening around you.
+        </P>
+        <CtaContainer>
+          <Link href="/marketplace">
+            <AccentedButton>Explore</AccentedButton>
+          </Link>
+          <Button>Create</Button>
+        </CtaContainer>
+      </TextWrap>
 
-export default Hero
+      <Image src={bgImage} alt="Background Image" />
+    </Background>
+  );
+};
+
+export default Hero;
+
+const Background = styled.div`
+  display: flex;
+  background-color: black;
+  height: 100vh;
+  position: relative;
+  justify-content: left;
+  align-items: center;
+  padding: 0px 100px;
+  color: white;
+
+  & > img {
+    width: 65%;
+  }
+`;
+
+const CtaContainer = styled.div`
+  display: flex;
+`;
+
+const AccentedButton = styled.button`
+  position: relative;
+  font-size: 1.125rem;
+  font-weight: 600;
+  padding: 1rem 2.5rem;
+  background-color: #2181e2;
+  border-radius: 0.5rem;
+  margin-right: 1.25rem;
+  color: white;
+  cursor: pointer;
+  &:hover {
+    background-color: #42a0ff;
+  }
+`;
+
+const Button = styled.button`
+  position: relative;
+  font-size: 1.125rem;
+  font-weight: 600;
+  padding: 1rem 2.5rem;
+  background-color: #363840;
+  border-radius: 0.5rem;
+  margin-right: 1.25rem;
+  color: #e4e8ea;
+  cursor: pointer;
+  &:hover {
+    background-color: #4c505c;
+  }
+`;
+
+const H1 = styled.h1`
+  position: relative;
+  color: white;
+  font-size: 2.875rem;
+  font-weight: bold;
+`;
+
+const P = styled.p`
+  color: #8a939b;
+  font-size: 1.5rem;
+  margin-top: 0.8rem;
+  margin-bottom: 2.5rem;
+`;
+
+const TextWrap = styled.div`
+  color: white;
+  flex-shrink: 0;
+  width: 40%;
+`;
