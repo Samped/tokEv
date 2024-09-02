@@ -1,16 +1,13 @@
-'use client'
+"use client";
 
-import Header from "../components/header"
-import Hero from "../components/Hero"
-import { useEffect, useState} from 'react'
+import Hero from "../components/Hero";
+import MarketPlace from "@/components/marketPlace";
 
 export default function Home() {
-
-  const [account, setAccount] = useState<string | null>(null); 
   return (
     <main>
-      <Header account={account} setAccount={setAccount} />
       <Hero />
+      <MarketPlace />
     </main>
   );
 }
