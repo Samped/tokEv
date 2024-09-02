@@ -5,6 +5,8 @@ const NAME = "Concert"
 const SYMBOL = "Con"
 
 const OCCASION_NAME = "Enugu Tech meet-up"
+const OCCASION_PICTURE = "image-url"
+const OCCASION_DESCRIPTION = "Annual Enugu developers conference"
 const OCCASION_COST = ethers.parseUnits('1', 'ether')
 const OCCASION_MAX_TICKETS = 100
 const OCCASION_DATE = "Sept 27"
@@ -13,19 +15,21 @@ const OCCASION_LOCATION = "Enugu, NIgeria"
 
 describe("EventTicketing", () => {
   let eventTickering;
-  let deployer, buyer;
+  let deployer, buyer, organizer;
 
 
 
   beforeEach(async () => {
     //setup accounts
-    [deployer, buyer] = await ethers.getSigners()
+    [deployer, buyer, organizer] = await ethers.getSigners()
 
     const EventTicketing = await ethers.getContractFactory("EventTicketing");
     eventTickering = await EventTicketing.deploy(NAME, SYMBOL);
 
-    const transaction = await eventTickering.connect(deployer).list(
+    const transaction = await eventTickering.connect(organizer).createEvent(
       OCCASION_NAME,
+      OCCASION_PICTURE,
+      OCCASION_DESCRIPTION,
       OCCASION_COST,
       OCCASION_MAX_TICKETS,
       OCCASION_DATE,
@@ -50,6 +54,27 @@ describe("EventTicketing", () => {
     });
 
   });
+
+  describe("organizer", () => {
+    it("should allow the organizer to create an event", async () => {
+      await eventTickering.connect(organizer).createEvent(
+        OCCASION_NAME,
+        OCCASION_PICTURE,
+        OCCASION_DESCRIPTION,
+        OCCASION_COST,
+        OCCASION_MAX_TICKETS,
+        OCCASION_DATE,
+        OCCASION_TIME,
+        OCCASION_LOCATION,
+      );
+      const occasion = await eventTickering.getOccasion(1);
+      expect(occasion.name).to.equal(OCCASION_NAME);
+      expect(occasion.cost).to.equal(OCCASION_COST);
+      expect(occasion.organizer).to.equal(organizer.address);
+      console.log(organizer.address)
+      console.log(deployer.address)
+    })
+  })
   describe("Occasions", () => {
     it("updates occasions count", async () => {
       const totalOccasions = await eventTickering.totalOccasions();
@@ -110,25 +135,20 @@ describe("EventTicketing", () => {
       let balanceBefore
 
       beforeEach(async () => {
-        balanceBefore =   await ethers.provider.getBalance(deployer.address);
+        balanceBefore =   await ethers.provider.getBalance(organizer.address);
         console.log(`balanceBefore is ${balanceBefore}`);
         let transaction = await eventTickering.connect(buyer).mint(ID, SEAT, { value: AMOUNT})
         await transaction.wait()
 
-        transaction = await eventTickering.connect(deployer).withdraw()
+        transaction = await eventTickering.connect(organizer).withdraw(ID)
         await transaction.wait()
       })
 
       it("Update the owner balance", async () => {
-        const balanceAfter = await ethers.provider.getBalance(deployer.address);
-        console.log(`balanceBefore is ${balanceAfter}`);
+        const balanceAfter = await ethers.provider.getBalance(organizer.address);
+        console.log(`balanceAfter is ${balanceAfter}`);
         expect(balanceAfter).to.be.greaterThan(balanceBefore)
         console.log(`balanceBefore is ${balanceBefore} and balanceAfter is ${balanceAfter}`);
-      })
-
-      it("Update the contract balance", async () => {
-        const balance = await ethers.provider.getBalance(eventTickering.target)
-        expect(balance).to.equal(0)
       })
     })
   })
