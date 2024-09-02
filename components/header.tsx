@@ -12,11 +12,12 @@ import { MdOutlineAccountBalanceWallet } from "react-icons/md";
 import { useEffect, useState } from "react";
 import Web3 from "web3";
 import styled from "styled-components";
+import { usePathname } from "next/navigation";
 
 declare const window: any;
 
 const style = {
-  wrapper: `bg-[#04111d] w-screen px-[1.2rem] py-[0.8rem] flex fixed top-0 z-50`,
+  wrapper: `bg-[#04111d] w-screen px-[1.2rem] py-[0.8rem] flex fixed top-0 z-50 justify-between`,
   logoContainer: `flex items-center cursor-pointer`,
   logoText: ` ml-[0.4rem] text-white font-semibold text-2xl`,
   searchBar: `flex flex-1 mx-[0.8rem] w-max-[520px] items-center bg-[#363840] rounded-[0.8rem] hover:bg-[#4c505c]`,
@@ -35,6 +36,9 @@ interface NavBarProps {
 }
 
 const Header: React.FC<NavBarProps> = ({ account, setAccount }) => {
+  const pathname = usePathname();
+  const marketPlaceUrl = "/marketplace";
+
   const connectHandler = async () => {
     if (
       typeof window !== "undefined" &&
@@ -56,15 +60,18 @@ const Header: React.FC<NavBarProps> = ({ account, setAccount }) => {
           <div className={style.logoText}>tokEv</div>
         </div>
       </Link>
-      <div className={style.searchBar}>
-        <div className={style.searchIcon}>
-          <AiOutlineSearch />
+      {pathname === marketPlaceUrl && (
+        <div className={style.searchBar}>
+          <div className={style.searchIcon}>
+            <AiOutlineSearch />
+          </div>
+          <input
+            className={style.searchInput}
+            placeholder="search events and accounts"
+          />
         </div>
-        <input
-          className={style.searchInput}
-          placeholder="search events and accounts"
-        />
-      </div>
+      )}
+
       <div className={style.headerItems}>
         <div>
           {account ? (
