@@ -25,9 +25,9 @@ export default Marketplace;
 
 const GridContainer = styled.div`
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 30px 25px;
-  padding: 100px 20px 20px;
+  padding: 120px 20px 60px;
 `;
 
 const GridItem = styled.div`

@@ -5,30 +5,15 @@ import Image from "next/image";
 import tokEv2 from "../public/tokEv2.png";
 import Link from "next/link";
 import React from "react";
-import logo from "../public/logo.png";
 import { AiOutlineSearch } from "react-icons/ai";
 import { CgProfile } from "react-icons/cg";
 import { MdOutlineAccountBalanceWallet } from "react-icons/md";
 import { useEffect, useState } from "react";
 import Web3 from "web3";
 import styled from "styled-components";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 declare const window: any;
-
-const style = {
-  wrapper: `bg-[#04111d] w-screen px-[1.2rem] py-[0.8rem] flex fixed top-0 z-50 justify-between`,
-  logoContainer: `flex items-center cursor-pointer`,
-  logoText: ` ml-[0.4rem] text-white font-semibold text-2xl`,
-  searchBar: `flex flex-1 mx-[0.8rem] w-max-[520px] items-center bg-[#363840] rounded-[0.8rem] hover:bg-[#4c505c]`,
-  searchIcon: `text-[#8a939b] mx-3 font-bold text-lg`,
-  searchInput: `h-[2.6rem] w-full border-0 bg-transparent outline-0 ring-0 px-2 pl-0 text-[#e6e8eb] placeholder:text-[#8a939b]`,
-  headerItems: ` flex items-center justify-end`,
-  headerItem: `text-white px-4 font-bold text-[#c8cacd] hover:text-white cursor-pointer`,
-  headerIcon: `text-[#8a939b] text-3xl font-black px-4 hover:text-white cursor-pointer flex items-center`,
-  walletconnect: `ml-[0.5rem] text-[#8a939b] font-bold text-2xl font-black hover:text-white`,
-  walletaddress: `ml-[0.8rem] text-white font-medium text-base flex items-center`,
-};
 
 interface NavBarProps {
   account: string | null;
@@ -37,6 +22,7 @@ interface NavBarProps {
 
 const Header: React.FC<NavBarProps> = ({ account, setAccount }) => {
   const pathname = usePathname();
+  const { push } = useRouter();
   const marketPlaceUrl = "/marketplace";
 
   const connectHandler = async () => {
@@ -50,54 +36,150 @@ const Header: React.FC<NavBarProps> = ({ account, setAccount }) => {
       setAccount(accounts[0]);
     }
   };
+
   return (
-    <div className={style.wrapper}>
+    <Wrapper>
       <Link href="/">
-        <div className={style.logoContainer}>
+        <LogoContainer>
           <LogoWrapper>
             <Image src={tokEv2} height={40} width={40} alt="tokev logo" />
           </LogoWrapper>
-          <div className={style.logoText}>tokEv</div>
-        </div>
+          <LogoText>tokEv</LogoText>
+        </LogoContainer>
       </Link>
       {pathname === marketPlaceUrl && (
-        <div className={style.searchBar}>
-          <div className={style.searchIcon}>
+        <SearchBar>
+          <SearchIcon>
             <AiOutlineSearch />
-          </div>
-          <input
-            className={style.searchInput}
-            placeholder="search events and accounts"
-          />
-        </div>
+          </SearchIcon>
+          <SearchInput placeholder="Search events and accounts" />
+        </SearchBar>
       )}
 
-      <div className={style.headerItems}>
-        <div>
-          {account ? (
-            <button type="button" className={style.walletaddress}>
-              <div className={style.headerIcon}>
-                <CgProfile />
-              </div>
-              {account.slice(0, 6) + "..." + account.slice(38, 42)}
-            </button>
-          ) : (
-            <button
-              type="button"
-              className={style.headerIcon}
-              onClick={connectHandler}
-            >
-              <MdOutlineAccountBalanceWallet />
-              <span className={style.walletconnect}>Connect</span>
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
+      <HeaderItems>
+        {account ? (
+          <WalletAddress>
+            <HeaderIcon>
+              <CgProfile />
+            </HeaderIcon>
+            {account.slice(0, 6) + "..." + account.slice(38, 42)}
+          </WalletAddress>
+        ) : (
+          <HeaderIcon onClick={connectHandler}>
+            <MdOutlineAccountBalanceWallet />
+            <WalletConnect>Connect</WalletConnect>
+          </HeaderIcon>
+        )}
+        <Button onClick={() => push("event/create")}>Create Events</Button>
+      </HeaderItems>
+    </Wrapper>
   );
 };
 
 export default Header;
+
+// Styled Components
+const Wrapper = styled.div`
+  background-color: #04111d;
+  width: 100vw;
+  padding: 0.8rem 1.2rem;
+  display: flex;
+  position: fixed;
+  top: 0;
+  z-index: 50;
+  justify-content: space-between;
+`;
+
+const LogoContainer = styled.div`
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+`;
+
+const LogoText = styled.div`
+  margin-left: 0.4rem;
+  color: white;
+  font-weight: 600;
+  font-size: 1.6rem;
+`;
+
+const SearchBar = styled.div`
+  display: flex;
+  flex: 1;
+  margin: 0 0.8rem;
+  max-width: 520px;
+  align-items: center;
+  background-color: #363840;
+  border-radius: 0.8rem;
+  &:hover {
+    background-color: #4c505c;
+  }
+`;
+
+const SearchIcon = styled.div`
+  color: #8a939b;
+  margin: 0 12px;
+  font-weight: bold;
+  font-size: 1.125rem;
+`;
+
+const SearchInput = styled.input`
+  height: 2.6rem;
+  width: 100%;
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: 0 0.5rem;
+  color: #e6e8eb;
+  &::placeholder {
+    color: #8a939b;
+  }
+`;
+
+const HeaderItems = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 20px;
+`;
+
+const HeaderIcon = styled.button`
+  color: #8a939b;
+  font-size: 3rem;
+  font-weight: bold;
+  padding: 0 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+
+  & > svg {
+    width: 35px;
+    height: 35px;
+  }
+
+  &:hover {
+    color: white;
+  }
+`;
+
+const WalletConnect = styled.span`
+  margin-left: 0.5rem;
+  font-size: 1.3rem;
+  font-weight: bold;
+`;
+
+const WalletAddress = styled.button`
+  display: flex;
+  align-items: center;
+  color: white;
+  font-size: 1rem;
+  background: none;
+  border: none;
+  font-weight: 500;
+  margin-left: 0.8rem;
+`;
 
 const LogoWrapper = styled.div`
   width: 40px;
@@ -107,5 +189,20 @@ const LogoWrapper = styled.div`
   & > img {
     transform: scale(2);
     margin-top: 4px;
+  }
+`;
+
+const Button = styled.button`
+  position: relative;
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 0.75rem 2.2rem;
+  background-color: #2181e2;
+  border-radius: 0.5rem;
+  margin-right: 1.25rem;
+  color: white;
+  cursor: pointer;
+  &:hover {
+    background-color: #42a0ff;
   }
 `;

@@ -42,7 +42,6 @@ const Container = styled.div`
   height: 100px;
   width: 100%;
   background: black;
-  margin-top: 30px;
   padding: 0 25px;
 `;
 
@@ -80,6 +79,11 @@ const SocialMedia = styled.div`
   gap: 12px;
   color: white;
   cursor: pointer;
+  transition: all 0.25s ease;
+
+  &:hover {
+    transform: scale(1.03);
+  }
 `;
 
 const Icon = styled.div`
