@@ -47,5 +47,6 @@ const Body = styled.body`
 `;
 
 const ContentWrapper = styled.div`
+  min-height: calc(100vh - 99px);
   flex-grow: 1;
 `;

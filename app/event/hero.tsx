@@ -18,7 +18,9 @@ const Hero = () => {
           <Link href="/marketplace">
             <AccentedButton>Explore</AccentedButton>
           </Link>
-          <Button>Create</Button>
+          <Link href={"/event/create"}>
+            <Button>Create</Button>
+          </Link>
         </CtaContainer>
       </TextWrap>
 

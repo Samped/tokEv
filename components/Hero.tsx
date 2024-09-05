@@ -3,21 +3,22 @@ import Link from "next/link";
 import styled from "styled-components";
 import Image from "next/image";
 import bgImage from "../public/bgImage2.jpg";
+import { useRouter } from "next/navigation";
 
 const Hero = () => {
+  const { push } = useRouter();
   return (
     <Background>
       <TextWrap>
         <H1>Welcome to tokEv!</H1>
         <P>
-          We're revolutionizing the ways important occurences are documented.
-          Tokenize your events, or whatever is happening around you.
+          Bringing events onchain, and enabling you get tickets with one click.
         </P>
         <CtaContainer>
           <Link href="/marketplace">
             <AccentedButton>Explore</AccentedButton>
           </Link>
-          <Button>Create</Button>
+          <Button onClick={() => push("event/create")}>Create</Button>
         </CtaContainer>
       </TextWrap>
 
@@ -86,7 +87,7 @@ const H1 = styled.h1`
 
 const P = styled.p`
   color: #8a939b;
-  font-size: 1.5rem;
+  font-size: 1.7rem;
   margin-top: 0.8rem;
   margin-bottom: 2.5rem;
 `;

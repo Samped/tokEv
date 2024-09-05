@@ -1,6 +1,8 @@
+import { useRouter } from "next/navigation";
 import styled from "styled-components";
 
 const MarketPlace = () => {
+  const { push } = useRouter();
   return (
     <Container>
       <Title>Explore our Marketplace.</Title>
@@ -11,7 +13,9 @@ const MarketPlace = () => {
         <SubTitle> Gain incentives. Your participation is important!</SubTitle>
       </TxtWrapper>
       <ButtonWrapper>
-        <Button>Start Your Adventure</Button>
+        <Button onClick={() => push("/marketplace")}>
+          Start Your Adventure
+        </Button>
       </ButtonWrapper>
     </Container>
   );
