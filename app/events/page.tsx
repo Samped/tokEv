@@ -11,7 +11,7 @@ import Web3 from 'web3'
 import eventTicketing from '../src/abi/eventTicketing.json'
 
 // Config
-import config from '../src/config.json'
+import config  from '../src/config.json'
 
 
 export default function events() {
@@ -23,7 +23,7 @@ export default function events() {
         const provider = new ethers.BrowserProvider(window.ethereum);
         setProvider(provider);
 
-        const address = config[31337].eventTicketing.address
+        const address = config[42421].eventTicketing.address
   
         const eventfunc = new ethers.Contract(
             address,
