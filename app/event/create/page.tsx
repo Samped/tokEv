@@ -2,6 +2,7 @@
 
 import React from "react";
 import styled from "styled-components";
+import { PictureUpload } from "./components/pictureUpload";
 
 const CreateForm = () => {
   return (
@@ -13,24 +14,36 @@ const CreateForm = () => {
           <Input type="text" id="name" />
         </FormGroup>
         <FormGroup>
-          <Label htmlFor="email">Cost</Label>
+          <Label htmlFor="email">Email</Label>
           <Input type="email" id="email" />
         </FormGroup>
         <FormGroup>
-          <Label htmlFor="name">Number of Tickets</Label>
-          <Input type="text" id="name" />
+          <Label htmlFor="picture">Picture</Label>
+          <PictureUpload />
         </FormGroup>
         <FormGroup>
-          <Label htmlFor="name">Date</Label>
-          <Input type="text" id="name" />
+          <Label htmlFor="description">Description</Label>
+          <Input type="text" id="description" />
         </FormGroup>
         <FormGroup>
-          <Label htmlFor="name">Time</Label>
-          <Input type="text" id="name" />
+          <Label htmlFor="cost">Cost</Label>
+          <Input type="email" id="cost" />
         </FormGroup>
         <FormGroup>
-          <Label htmlFor="name">Location</Label>
-          <Input type="text" id="name" />
+          <Label htmlFor="numOfTickets">Number of Tickets</Label>
+          <Input type="text" id="numOfTickets" />
+        </FormGroup>
+        <FormGroup>
+          <Label htmlFor="date">Date</Label>
+          <Input type="date" id="date" />
+        </FormGroup>
+        <FormGroup>
+          <Label htmlFor="time">Time</Label>
+          <Input type="time" id="time" />
+        </FormGroup>
+        <FormGroup>
+          <Label htmlFor="location">Location</Label>
+          <Input type="text" id="location" />
         </FormGroup>
         <FormGroup>
           <Button type="submit">Submit</Button>
@@ -96,3 +109,4 @@ const H1 = styled.h1`
   font-size: 2.875rem;
   font-weight: bold;
 `;
+
