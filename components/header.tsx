@@ -1,6 +1,5 @@
 "use client";
 
-import { ethers } from "ethers";
 import Image from "next/image";
 import tokEv2 from "../public/tokEv2.png";
 import Link from "next/link";
@@ -8,7 +7,6 @@ import React from "react";
 import { AiOutlineSearch } from "react-icons/ai";
 import { CgProfile } from "react-icons/cg";
 import { MdOutlineAccountBalanceWallet } from "react-icons/md";
-import { useEffect, useState } from "react";
 import Web3 from "web3";
 import styled from "styled-components";
 import { usePathname, useRouter } from "next/navigation";
@@ -58,11 +56,11 @@ const Header: React.FC<NavBarProps> = ({ account, setAccount }) => {
 
       <HeaderItems>
         {account ? (
-          <WalletAddress>
+          <WalletAddress onClick={() => push("/dashboard")}>
             <HeaderIcon>
               <CgProfile />
             </HeaderIcon>
-            {account.slice(0, 6) + "..." + account.slice(38, 42)}
+            {account?.slice(0, 6) + "..." + account?.slice(38, 42)}
           </WalletAddress>
         ) : (
           <HeaderIcon onClick={connectHandler}>
@@ -70,7 +68,7 @@ const Header: React.FC<NavBarProps> = ({ account, setAccount }) => {
             <WalletConnect>Connect</WalletConnect>
           </HeaderIcon>
         )}
-        <Button onClick={() => push("event/create")}>Create Events</Button>
+        <Button onClick={() => push("/event/create")}>Create Event</Button>
       </HeaderItems>
     </Wrapper>
   );
