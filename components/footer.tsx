@@ -41,7 +41,7 @@ const Container = styled.div`
   justify-content: space-between;
   height: 100px;
   width: 100%;
-  background: black;
+  background: #04111D;
   padding: 0 25px;
 `;
 

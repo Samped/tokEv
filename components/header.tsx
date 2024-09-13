@@ -44,11 +44,11 @@ const Header: React.FC = () => {
 
       <HeaderItems>
         {account ? (
-          <WalletAddress>
+          <WalletAddress onClick={() => push("/dashboard")}>
             <HeaderIcon>
               <CgProfile />
             </HeaderIcon>
-            {account.slice(0, 6) + "..." + account.slice(38, 42)}
+            {account?.slice(0, 6) + "..." + account?.slice(38, 42)}
           </WalletAddress>
         ) : (
           <HeaderIcon onClick={connectWallet}>
