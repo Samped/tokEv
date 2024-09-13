@@ -1,42 +1,28 @@
 "use client";
 
-import { ethers } from "ethers";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import tokEv2 from "../public/tokEv2.png";
 import Link from "next/link";
-import React from "react";
+import styled from "styled-components";
 import { AiOutlineSearch } from "react-icons/ai";
 import { CgProfile } from "react-icons/cg";
 import { MdOutlineAccountBalanceWallet } from "react-icons/md";
-import { useEffect, useState } from "react";
-import Web3 from "web3";
-import styled from "styled-components";
 import { usePathname, useRouter } from "next/navigation";
+import { useWallet } from "@/app/hooks/useWallet";
 
-declare const window: any;
-
-interface NavBarProps {
-  account: string | null;
-  setAccount: React.Dispatch<React.SetStateAction<string | null>>;
-}
-
-const Header: React.FC<NavBarProps> = ({ account, setAccount }) => {
+const Header: React.FC = () => {
   const pathname = usePathname();
   const { push } = useRouter();
   const marketPlaceUrl = "/marketplace";
 
-  const connectHandler = async () => {
-    if (
-      typeof window !== "undefined" &&
-      typeof window.ethereum !== "undefined"
-    ) {
-      window.ethereum.request({ method: "eth_requestAccounts" });
-      const web3instance = new Web3(window.ethereum);
-      const accounts = await web3instance.eth.getAccounts();
-      setAccount(accounts[0]);
-    }
-  };
-
+    // Access the wallet state from context
+    const { account, connectWallet, disconnectWallet } = useWallet();
+    const [showDisconnect, setShowDisconnect] = useState(false);
+  
+    const handleWalletClick = () => {
+      setShowDisconnect(!showDisconnect);
+    };
   return (
     <Wrapper>
       <Link href="/">
@@ -65,10 +51,18 @@ const Header: React.FC<NavBarProps> = ({ account, setAccount }) => {
             {account.slice(0, 6) + "..." + account.slice(38, 42)}
           </WalletAddress>
         ) : (
-          <HeaderIcon onClick={connectHandler}>
+          <HeaderIcon onClick={connectWallet}>
             <MdOutlineAccountBalanceWallet />
             <WalletConnect>Connect</WalletConnect>
           </HeaderIcon>
+        )}
+        {showDisconnect && (
+          <DisconnectOption onClick={() => {
+            disconnectWallet();
+            setShowDisconnect(false);
+          }}>
+            Disconnect
+          </DisconnectOption>
         )}
         <Button onClick={() => push("event/create")}>Create Events</Button>
       </HeaderItems>
@@ -204,5 +198,19 @@ const Button = styled.button`
   cursor: pointer;
   &:hover {
     background-color: #42a0ff;
+  }
+`;
+
+const DisconnectOption = styled.button`
+  background: #ff4d4d;
+  color: white;
+  border: none;
+  border-radius: 0.4rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-left: 1rem;
+  &:hover {
+    background: #e60000;
   }
 `;
