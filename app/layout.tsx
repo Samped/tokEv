@@ -2,37 +2,28 @@
 import Footer from "@/components/footer";
 import Header from "@/components/header";
 import StyledComponentsRegistry from "@/lib/register";
-import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { useEffect, useState } from "react";
 import styled from "styled-components";
+import { WalletProvider } from "./hooks/WalletProvider";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
-
-const theme = {
-  // your theme values
-};
-
-// export const metadata: Metadata = {
-//   title: "tokEv",
-//   description: "tokenization of events",
-// };
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [account, setAccount] = useState<string | null>(null);
-
   return (
     <html lang="en">
       <Body className={inter.className}>
         <StyledComponentsRegistry>
-          <Header account={account} setAccount={setAccount} />
-          <ContentWrapper>{children}</ContentWrapper>
-          <Footer />
+          <WalletProvider>
+            {/* Removed account and setAccount, since Header will get it from context */}
+            <Header />
+            <ContentWrapper>{children}</ContentWrapper>
+            <Footer />
+          </WalletProvider>
         </StyledComponentsRegistry>
       </Body>
     </html>
