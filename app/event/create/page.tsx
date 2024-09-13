@@ -6,6 +6,7 @@ import { Interface } from 'ethers';
 import abi from '../../src/abi/eventTicketing.json'; 
 import { PictureUpload } from "./components/pictureUpload";
 import { useWallet } from "@/app/hooks/useWallet";
+import bgimage from "../../../public/image5.jpg"
 
 const CreateForm = () => {
   const { account, connectWallet, walletClient } = useWallet();
@@ -191,7 +192,7 @@ const CreateForm = () => {
         </FormGroup>
 
         {account ? (
-          <Button type="submit">Submit</Button>
+          <Button type="submit">Create</Button>
         ) : (
           <Button type="button" onClick={() => connectWallet()}>
             Connect Wallet
@@ -259,4 +260,3 @@ const H1 = styled.h1`
   font-size: 2.875rem;
   font-weight: bold;
 `;
-
