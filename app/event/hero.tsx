@@ -3,7 +3,7 @@ import React from "react";
 import Link from "next/link";
 import styled from "styled-components";
 import Image from "next/image";
-import bgImage from "../../public/Image5.jpg";
+import bgImage from "../../public/image5.jpg";
 
 const Hero = () => {
   return (
