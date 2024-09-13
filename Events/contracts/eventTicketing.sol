@@ -72,7 +72,7 @@ contract EventTicketing is ERC721 {
         require(_id != 0 && _id <= totalOccasions, "Invalid occasion ID");
 
         // Validate payment amount
-        require(msg.value >= occasions[_id].cost, "Insufficient ETH sent");
+        require(msg.value >= occasions[_id].cost, "Insufficient RWA sent");
 
         // Validate seat availability
         require(seatTaken[_id][_seat] == address(0), "Seat already taken");
@@ -84,7 +84,7 @@ contract EventTicketing is ERC721 {
         seatTaken[_id][_seat] = msg.sender;
         seatsTaken[_id].push(_seat);
 
-        // Increase the event's balance by the amount of ETH sent
+        // Increase the event's balance by the amount of RWA sent
         occasions[_id].balance += msg.value;
 
         totalSupply++;
