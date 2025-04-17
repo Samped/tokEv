@@ -44,7 +44,7 @@ const Header: React.FC = () => {
 
       <HeaderItems>
         {account ? (
-          <WalletAddress onClick={() => push("/dashboard")}>
+          <WalletAddress onClick={() =>{connectWallet}}>
             <HeaderIcon>
               <CgProfile />
             </HeaderIcon>
