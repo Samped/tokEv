@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { createWalletClient, custom } from 'viem';
-import { assetChainTestnet } from 'viem/chains';
+import { teaSepolia } from '../chains/teaSepolia'
 
 interface WalletContextType {
   account: string | null;
@@ -30,7 +30,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         if (accounts.length > 0) {
           setAccount(accounts[0]);
           const walletClientInstance = createWalletClient({
-            chain: assetChainTestnet,
+            chain: teaSepolia,
             transport: custom(window.ethereum),
           });
           setWalletClient(walletClientInstance);
@@ -47,7 +47,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setAccount(accounts[0]);
 
         const walletClientInstance = createWalletClient({
-          chain: assetChainTestnet,
+          chain: teaSepolia,
           transport: custom(window.ethereum),
         });
         setWalletClient(walletClientInstance);
