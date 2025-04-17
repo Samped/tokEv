@@ -1,36 +1,27 @@
-"use client";
-
+"use client"; 
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useWallet } from '../hooks/useWallet'; // Import the custom hook
-import { Interface } from 'ethers';
-import abi from '../src/abi/eventTicketing.json';
+import { useWallet } from "../hooks/useWallet"; // Import the custom hook
+import { ethers } from "ethers";
+import { Interface } from "@ethersproject/abi";
+import abi from "../src/abi/eventTicketing.json";
 
 const Marketplace = () => {
   const [events, setEvents] = useState<any[]>([]);
-  const [visibleDescription, setVisibleDescription] = useState<number | null>(null);
+  const [visibleDescriptions, setVisibleDescriptions] = useState<Set<number>>(new Set());
+  const [seatNumbers, setSeatNumbers] = useState<Record<number, number | null>>({});
   const { push } = useRouter();
+  const { account, signer } = useWallet();
 
-  // State to track event ID and seat number
-  const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
-  const [seatNumber, setSeatNumber] = useState<number | null>(null);
-
-  // Use the custom useWallet hook
-  const { account, walletClient } = useWallet();
-
-  const handleDescriptionToggle = (id: number) => {
-    setVisibleDescription(visibleDescription === id ? null : id);
-  };
-
-  // Fetch events from API
+  // Fetch events from API (or your database)
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await fetch('/api/get-events');
+        const response = await fetch("/api/get-events"); // This can be a call to your backend API
         const data = await response.json();
-        setEvents(data);
+        setEvents(data); // Assume data has fields like event.id, event.name, event.cost (price)
       } catch (error) {
         console.error("Error fetching events:", error);
       }
@@ -38,85 +29,140 @@ const Marketplace = () => {
     fetchEvents();
   }, []);
 
+  const handleDescriptionToggle = (id: number) => {
+    setVisibleDescriptions(prev => {
+      const newVisibleDescriptions = new Set(prev);
+      if (newVisibleDescriptions.has(id)) {
+        newVisibleDescriptions.delete(id);
+      } else {
+        newVisibleDescriptions.add(id);
+      }
+      return newVisibleDescriptions;
+    });
+  };
+
+  const handleSeatNumberChange = (eventId: number, value: number) => {
+    setSeatNumbers((prevSeatNumbers) => ({
+      ...prevSeatNumbers,
+      [eventId]: value,
+    }));
+  };
+
   const buyTicket = async (eventId: number, seat: number, ticketPrice: number) => {
-    if (!walletClient || !account) {
+    if (!signer || !account) {
       alert("Please connect your wallet first.");
       return;
     }
-
+  
+    if (ticketPrice === undefined || ticketPrice === null || isNaN(ticketPrice)) {
+      alert("Invalid ticket price.");
+      return;
+    }
+  
+    // Debug: Log the eventId and seat to see if they are valid
+    console.log("Buying Ticket for Event ID:", eventId, "Seat:", seat);
+  
+    // Check if eventId and seat are valid
+    if (eventId === undefined || seat === undefined || seat === null || seat <= 0) {
+      console.error("Invalid event or seat number.");
+      alert("Invalid event or seat number.");
+      return;
+    }
+  
+    // Ensure seatNumbers[event.id] is correctly populated
+    console.log("Seat Numbers State:", seatNumbers);
+  
     const iface = new Interface(abi);
-    const functionName = 'mint'; 
+    const functionName = "mint"; 
     const params = [eventId, seat]; // Pass eventId and seat number
-    const encodedData = iface.encodeFunctionData(functionName, params);
-
+  
+    // Log the parameters before encoding
+    console.log("Parameters for minting:", params);
+    
+    let encodedData;
     try {
-
-      const adjustedTicketPrice = ticketPrice + 0.01;
-      // Send the transaction
-      const txHash = await walletClient.sendTransaction({
-        account: account as `0x${string}`,
-        to: '0x3dE7a4C348F7415087a9Cf58FBC57256bAF1eb4b', // Replace with your contract address
-        data: encodedData as `0x${string}`,
-        value: BigInt(adjustedTicketPrice * 1e18), 
-        gas: BigInt(4000000),
+      encodedData = iface.encodeFunctionData(functionName, params);
+      console.log("🔐 Encoded data:", encodedData);
+    } catch (err) {
+      console.error("❌ ABI encoding failed:", err);
+      return;
+    }
+  
+    try {
+      const adjustedTicketPrice = ticketPrice + 0.01; // Adjust with any additional fee (like transaction fee)
+      const estimatedGas = await signer.estimateGas({
+          to: '0x14A09cdE2841385079608F16FDF71569138F554F',
+          data: encodedData,
+        });
+  
+        const feeData = await signer.getFeeData();
+        const adjustedGasLimit = estimatedGas.add(ethers.BigNumber.from("10000")); // buffer
+  
+      // Send the transaction with the ticket price, event ID, and seat number
+      const tx = await signer.sendTransaction({
+        to: '0x14A09cdE2841385079608F16FDF71569138F554F',
+        data: encodedData,
+        gasLimit: adjustedGasLimit,
+        maxFeePerGas: feeData.maxFeePerGas?.add(ethers.BigNumber.from("1000000000")),
+        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas?.add(ethers.BigNumber.from("1000000000")),
       });
-
-      console.log(`Transaction hash: ${txHash}`);
-
-      // Poll for transaction receipt
-      const provider = walletClient.provider;
-      let receipt = null;
-      while (receipt === null) {
-        receipt = await provider.getTransactionReceipt(txHash);
-        if (receipt === null) {
-          // Wait for a while before polling again
-          await new Promise(resolve => setTimeout(resolve, 5000)); // Wait for 5 seconds
-        }
-      }
-
-      console.log("Ticket purchased successfully!");
+  
+      console.log("Transaction sent:", tx.hash);
+  
+      const receipt = await tx.wait();
+      console.log("Ticket purchased successfully!", receipt);
     } catch (error) {
       console.error("Error buying ticket:", error);
     }
   };
-
+  
   return (
     <GridContainer>
       {events.map((event) => (
-        <GridItem key={event.id}>
-          <Image src={event.picture} alt={event.name} width={300} height={200} />
+        <GridItem key={event.eventId}>
+          <ImageWrapper>
+            <Image
+              src="/bgImage.jpg"
+              alt={event.name}
+              fill
+              style={{
+                objectFit: "cover",
+                borderTopLeftRadius: "8px",
+                borderTopRightRadius: "8px",
+              }}
+            />
+          </ImageWrapper>
           <EventContent>
             <EventHeader>
               <h3>{event.name.toUpperCase()}</h3>
-              <p>Price: {event.cost} RWA</p>
+              <p>Price: {event.cost} eTEA</p>
+              <p>Event ID: {event.id}</p> {/* Display Event ID here */}
             </EventHeader>
-            {visibleDescription === event.id && (
+            {visibleDescriptions.has(event.id) && (
               <EventDescription>{event.description}</EventDescription>
             )}
-            <ToggleButton onClick={() => handleDescriptionToggle(event.id)}>
-              {visibleDescription === event.id ? 'Hide Description' : 'Show Description'}
-            </ToggleButton>
-
-            {/* Input fields for event ID and seat number */}
-            <Input
-              type="number"
-              placeholder="Enter Event ID"
-              value={selectedEventId ?? ''}
-              onChange={(e) => setSelectedEventId(Number(e.target.value))}
-            />
+            
+            {/* Input field for seat number specific to each event */}
             <Input
               type="number"
               placeholder="Enter Seat Number"
-              value={seatNumber ?? ''}
-              onChange={(e) => setSeatNumber(Number(e.target.value))}
+              value={seatNumbers[event.id] || ""}
+              onChange={(e) => handleSeatNumberChange(event.id, Number(e.target.value))}
             />
+
+            {/* Toggle Button for showing event description */}
+            <ToggleButton onClick={() => handleDescriptionToggle(event.id)}>
+              {visibleDescriptions.has(event.id) ? "Hide Description" : "Show Event Description"}
+            </ToggleButton>
 
             <BuyButton
               onClick={() => {
-                if (selectedEventId && seatNumber !== null) {
-                  buyTicket(selectedEventId, seatNumber, event.cost);
+                const seat = seatNumbers[event.id];
+                const ticketPrice = event.cost; // Fetch ticket price from event data
+                if (seat !== null && ticketPrice !== undefined) {
+                  buyTicket(event.id, seat, ticketPrice);
                 } else {
-                  alert("Please enter both Event ID and Seat Number.");
+                  alert("Please enter a Seat Number and ensure the Ticket Price is valid.");
                 }
               }}
             >
@@ -136,47 +182,79 @@ export default Marketplace;
 const GridContainer = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 40px 30px; 
-  padding: 130px 20px 60px;
+  gap: 45px 50px;
+  padding: 130px 80px 60px;
+  background-color: #001f3f; // dark blue
+  min-height: 100vh;
 `;
 
 const GridItem = styled.div`
-  display: flex;
-  flex-direction: column;
-  background-color: #f9f9f9; 
+  background-color: rgba(185, 214, 238, 0.88);
   border: 1px solid #ddd;
   border-radius: 8px;
-  padding: 20px; 
+  overflow: hidden;
   text-align: center;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  height: 100%; 
-  margin-top: 0px;
+  width: 500px;
+  height: 400px;
+  display: flex;
+  flex-direction: column;
+`;
+
+const ImageWrapper = styled.div`
+  position: relative;
+  width: 100%;
+  height: 300px;
+  overflow: hidden;
 `;
 
 const EventContent = styled.div`
+  padding: 10px;
+  font-size: 0.8em;
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  height: 100%;
+  flex-direction: row;
+  align-items: center;
   justify-content: space-between;
+  gap: 6px;
+  overflow-x: auto;
 `;
 
 const EventHeader = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 0px;
-
-  h3 {
-    margin: 0;
-    padding: 20px;
-    font-weight: bold;
-  }
-
+  h3{
+    font-size: 1.8em;
+    margin-right: 20px;
+  },
   p {
     margin: 0;
-    padding: 20px;
+    font-size: 1em;
     font-weight: bold;
+    padding: 1px -20px;
+    margin-right: 20px;
+  }
+`;
+
+const Input = styled.input`
+  padding: 6px;
+  font-size: 0.9em; /* Slightly smaller font size */
+  width: 100px; /* Set a fixed width for the input field */
+  margin-top: 20px;
+  border-radius: 4px;
+  background-color: rgb(214, 223, 233);
+`;
+
+const BuyButton = styled.button`
+  background-color: #0070f3;
+  color: white;
+  border: none;
+  padding: 8px 35px;
+  font-size: 1.1em;
+  border-radius: 4px;
+  margin-top: 20px;
+  cursor: pointer;
+  justify-content: center;
+
+  &:hover {
+    background-color: #005bb5;
   }
 `;
 
@@ -193,30 +271,9 @@ const ToggleButton = styled.button`
   cursor: pointer;
   margin-top: 10px;
   font-size: 0.9em;
+  
 
   &:hover {
     text-decoration: underline;
   }
-`;
-
-const BuyButton = styled.button`
-  background-color: #0070f3;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-top: 10px;
-
-  &:hover {
-    background-color: #005bb5;
-  }
-`;
-
-const Input = styled.input`
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  margin-top: 10px;
-  font-size: 1em;
 `;

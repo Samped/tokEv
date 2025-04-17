@@ -1,55 +1,38 @@
-import { useState, useEffect } from "react";
-import { createWalletClient, custom } from 'viem';
-import { assetChainTestnet } from 'viem/chains';
+import { useEffect, useState } from "react";
+import { ethers } from "ethers";
 
 export const useWallet = () => {
   const [account, setAccount] = useState<string | null>(null);
-  const [walletClient, setWalletClient] = useState<any>(null);
-
-  // Check if wallet is connected on component mount
-  useEffect(() => {
-    const checkWalletConnection = async () => {
-      if (window.ethereum) {
-        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-        if (accounts.length > 0) {
-          setAccount(accounts[0]);
-          const walletClientInstance = createWalletClient({
-            chain: assetChainTestnet,
-            transport: custom(window.ethereum),
-          });
-          setWalletClient(walletClientInstance);
-        }
-      }
-    };
-
-    checkWalletConnection();
-  }, []);
+  const [provider, setProvider] = useState<ethers.providers.Web3Provider | null>(null);
+  const [signer, setSigner] = useState<ethers.Signer | null>(null);
 
   const connectWallet = async () => {
-    if (window.ethereum) {
-      try {
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        setAccount(accounts[0]);
-
-        const walletClientInstance = createWalletClient({
-          chain: assetChainTestnet,
-          transport: custom(window.ethereum),
-        });
-        setWalletClient(walletClientInstance);
-      } catch (error) {
-        console.error("Error connecting to wallet:", error);
-      }
-    } else {
+    if (!window.ethereum) {
       alert("MetaMask is not installed.");
+      return;
     }
+
+    const providerInstance = new ethers.providers.Web3Provider(window.ethereum);
+    await providerInstance.send("eth_requestAccounts", []); // ✅ request permission
+
+    const signerInstance = providerInstance.getSigner();
+    const address = await signerInstance.getAddress();
+
+    setProvider(providerInstance);
+    setSigner(signerInstance);
+    setAccount(address);
   };
 
+  useEffect(() => {
+    connectWallet();
+  }, []);
 
   const disconnectWallet = () => {
     setAccount(null);
-    setWalletClient(null);
+    setProvider(null);
+    setSigner(null);
     window.location.reload();
   };
 
-  return { account, walletClient, connectWallet, disconnectWallet };
+  return { account, provider, signer, connectWallet, disconnectWallet };
 };

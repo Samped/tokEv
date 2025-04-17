@@ -1,15 +1,15 @@
-"use client";
+"use client";  // <-- Add this line at the top of the file
 
+import { Interface } from '@ethersproject/abi';
+import { BigNumberish, ethers } from 'ethers';
 import React, { useState, useEffect } from "react";
-import styled from "styled-components";
-import { Interface } from 'ethers'; 
+import styled from "styled-components"; 
 import abi from '../../src/abi/eventTicketing.json'; 
-import { PictureUpload } from "./components/pictureUpload";
 import { useWallet } from "@/app/hooks/useWallet";
-import bgimage from "../../../public/image5.jpg"
+import { useRouter } from "next/navigation"; // Import the useRouter hook for redirection
 
 const CreateForm = () => {
-  const { account, connectWallet, walletClient } = useWallet();
+  const { account, connectWallet, signer } = useWallet();
   const [formState, setFormState] = useState({
     name: "",
     picture: "",
@@ -19,76 +19,34 @@ const CreateForm = () => {
     date: "",
     time: "",
     location: "",
+    eventId: "",
   });
 
+  const router = useRouter(); // Initialize useRouter hook
 
-  // Function to interact with the smart contract
-  const interactWithContract = async () => {
-    if (!walletClient || !account) return;
-
-    const iface = new Interface(abi);
-
-    // Encode function data for the write operation
-    const functionName = 'createEvent'; // Replace with your actual function name
-    const params = [
-      formState.name,
-      formState.picture,
-      formState.description,
-      formState.cost,
-      formState.numOfTickets,
-      formState.date,
-      formState.time,
-      formState.location,
-    ];
-    const encodedData = iface.encodeFunctionData(functionName, params);
-    const hexEncodedData = `0x${encodedData.replace(/^0x/, '')}`;
-
-    // Create the transaction
+  const saveEventToDatabase = async (eventId: string) => {
     try {
-      const txHash = await walletClient.sendTransaction({
-        account: account as `0x${string}`, // Ensure account is in correct format
-        to: '0x3dE7a4C348F7415087a9Cf58FBC57256bAF1eb4b', 
-        data: hexEncodedData as `0x${string}`,
-        gas: BigInt(4000000),
-      });
-
-      console.log(`Transaction hash: ${txHash}`);
-      
-      // Poll for transaction receipt
-      const receipt = await waitForTransactionReceipt(txHash);
-      console.log(`Transaction confirmed with receipt:`, receipt);
-
-      // If the transaction is successful, send the event data to MongoDB
-      await saveEventToDatabase();
-    } catch (error) {
-      console.error("Error interacting with contract:", error);
-    }
-  };
-
-
-  const saveEventToDatabase = async () => {
-    try {
-      // Save the event to the database
+      // Save the event to the database with the eventId
       const response = await fetch('/api/create-event', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formState),
+        body: JSON.stringify({ ...formState, eventId }),
       });
-  
+
       if (response.ok) {
         console.log("Event successfully saved to database.");
-  
+
         // Notify the marketplace about the new event
         const marketplaceResponse = await fetch('/api/notify-marketplace', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(formState),
+          body: JSON.stringify({ ...formState, eventId }),
         });
-  
+
         if (marketplaceResponse.ok) {
           console.log("Event successfully sent to marketplace.");
         } else {
@@ -102,35 +60,86 @@ const CreateForm = () => {
     }
   };
 
+  const interactWithContract = async () => {
+    console.log("📡 Attempting to interact with contract...");
 
-  // Function to wait for transaction receipt
-  const waitForTransactionReceipt = async (txHash: string, interval = 1000, maxRetries = 60) => {
-    for (let i = 0; i < maxRetries; i++) {
-      try {
-        const response = await fetch('https://enugu-rpc.assetchain.org/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            jsonrpc: "2.0",
-            method: "eth_getTransactionReceipt",
-            params: [txHash],
-            id: 1,
-          }),
-        });
-
-        const data = await response.json();
-        const receipt = data.result;
-        if (receipt) {
-          return receipt;
-        }
-      } catch (error) {
-        console.error(`Error fetching receipt: ${error}`);
-      }
-      await new Promise(resolve => setTimeout(resolve, interval)); // Wait before retrying
+    if (!signer || !account) {
+      console.log("❌ No signer or account detected.");
+      return;
     }
-    throw new Error(`Transaction receipt not found after ${maxRetries} retries.`);
+
+    const iface = new Interface(abi);
+    const functionName = 'createEvent';
+    const params = [
+      formState.name,
+      formState.picture,
+      formState.description,
+      formState.cost,
+      formState.numOfTickets,
+      formState.date,
+      formState.time,
+      formState.location,
+    ];
+
+    let encodedData;
+    try {
+      encodedData = iface.encodeFunctionData(functionName, params);
+      console.log("🔐 Encoded data:", encodedData);
+    } catch (err) {
+      console.error("❌ ABI encoding failed:", err);
+      return;
+    }
+
+    try {
+      const estimatedGas = await signer.estimateGas({
+        to: '0x14A09cdE2841385079608F16FDF71569138F554F',
+        data: encodedData,
+      });
+
+      const feeData = await signer.getFeeData();
+      const adjustedGasLimit = estimatedGas.add(ethers.BigNumber.from("10000")); // buffer
+
+      const tx = await signer.sendTransaction({
+        to: '0x14A09cdE2841385079608F16FDF71569138F554F',
+        data: encodedData,
+        gasLimit: adjustedGasLimit,
+        maxFeePerGas: feeData.maxFeePerGas?.add(ethers.BigNumber.from("1000000000")),
+        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas?.add(ethers.BigNumber.from("1000000000")),
+      });
+
+      console.log("🚀 Transaction hash:", tx.hash);
+      console.log("📬 Account interacting:", account);
+
+      const receipt = await tx.wait();
+      console.log("✅ Transaction confirmed:", receipt);
+
+      // Create a contract instance to read totalOccasions
+      const contract = new ethers.Contract(
+        '0x14A09cdE2841385079608F16FDF71569138F554F',
+        abi,
+        signer
+      );
+
+      // totalOccasions is called after the event is created
+      const total = await contract.totalOccasions();
+      const eventId = total.sub(1); // eventId = totalOccasions - 1
+      console.log("📦 Event ID (from totalOccasions - 1):", eventId.toString());
+
+      // Add the eventId to the formState before sending to database
+      setFormState(prevState => ({
+        ...prevState,
+        eventId: eventId.toString(),
+      }));
+
+      // Save the event to the database, now including the eventId
+      await saveEventToDatabase(eventId.toString());
+
+      // Redirect to the marketplace after successful event creation
+      router.push("/marketplace"); // Navigate to the marketplace page
+
+    } catch (error: any) {
+      console.error("❌ Error during transaction flow:", error);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -162,9 +171,8 @@ const CreateForm = () => {
           <Input type="text" id="name" onChange={handleChange} />
         </FormGroup>
         <FormGroup>
-          <Label htmlFor="picture">picture</Label>
-
-          <PictureUpload/>
+          <Label htmlFor="picture">Picture</Label>
+          <Input type="text" id="picture" onChange={handleChange} />
         </FormGroup>
         <FormGroup>
           <Label htmlFor="description">Description</Label>
@@ -260,3 +268,4 @@ const H1 = styled.h1`
   font-size: 2.875rem;
   font-weight: bold;
 `;
+

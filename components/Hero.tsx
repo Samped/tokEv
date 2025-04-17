@@ -12,7 +12,7 @@ const Hero = () => {
       <TextWrap>
         <H1>Welcome to tokEv!</H1>
         <P>
-          Bringing events onchain, and enabling you get tickets with one click.
+          Bringing events onchain, and enabling you stream your favourite events with one click.
         </P>
         <CtaContainer>
           <Link href="/marketplace">

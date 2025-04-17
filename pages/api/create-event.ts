@@ -5,7 +5,6 @@ import { MongoClient } from 'mongodb';
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === 'POST') {
     try {
-      console.log('Connecting to the database...');
       const client: MongoClient = await clientPromise;
       const db = client.db('tokev');
       const collection = db.collection('events');
