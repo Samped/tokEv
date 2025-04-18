@@ -59,26 +59,18 @@ const Marketplace = () => {
       return;
     }
   
-    // Debug: Log the eventId and seat to see if they are valid
-    console.log("Buying Ticket for Event ID:", eventId, "Seat:", seat);
-  
-    // Check if eventId and seat are valid
     if (eventId === undefined || seat === undefined || seat === null || seat <= 0) {
       console.error("Invalid event or seat number.");
       alert("Invalid event or seat number.");
       return;
     }
   
-    // Ensure seatNumbers[event.id] is correctly populated
-    console.log("Seat Numbers State:", seatNumbers);
-  
     const iface = new Interface(abi);
-    const functionName = "mint"; 
-    const params = [eventId, seat]; // Pass eventId and seat number
+    const functionName = "mint";
+    const params = [eventId, seat];
   
-    // Log the parameters before encoding
     console.log("Parameters for minting:", params);
-    
+  
     let encodedData;
     try {
       encodedData = iface.encodeFunctionData(functionName, params);
@@ -89,30 +81,38 @@ const Marketplace = () => {
     }
   
     try {
-      const adjustedTicketPrice = ticketPrice + 0.01; // Adjust with any additional fee (like transaction fee)
+      // ✅ Convert ticket price (in ETH) to wei
+      const value = ethers.utils.parseEther(ticketPrice.toString());
+      console.log("💸 Ticket price in wei:", value.toString());
+  
+      // ✅ Estimate gas with value included
       const estimatedGas = await signer.estimateGas({
-          to: '0x14A09cdE2841385079608F16FDF71569138F554F',
-          data: encodedData,
-        });
+        to: "0x14A09cdE2841385079608F16FDF71569138F554F",
+        data: encodedData,
+        value,
+      });
   
-        const feeData = await signer.getFeeData();
-        const adjustedGasLimit = estimatedGas.add(ethers.BigNumber.from("10000")); // buffer
+      const feeData = await signer.getFeeData();
+      const adjustedGasLimit = estimatedGas.add(ethers.BigNumber.from("10000")); // Add buffer
   
-      // Send the transaction with the ticket price, event ID, and seat number
+      // ✅ Send the transaction with correct value
       const tx = await signer.sendTransaction({
-        to: '0x14A09cdE2841385079608F16FDF71569138F554F',
+        to: "0x14A09cdE2841385079608F16FDF71569138F554F",
         data: encodedData,
         gasLimit: adjustedGasLimit,
         maxFeePerGas: feeData.maxFeePerGas?.add(ethers.BigNumber.from("1000000000")),
         maxPriorityFeePerGas: feeData.maxPriorityFeePerGas?.add(ethers.BigNumber.from("1000000000")),
+        value,
       });
   
       console.log("Transaction sent:", tx.hash);
   
       const receipt = await tx.wait();
-      console.log("Ticket purchased successfully!", receipt);
+      console.log("🎉 Ticket purchased successfully!", receipt);
+      alert("Ticket purchased successfully!");
     } catch (error) {
-      console.error("Error buying ticket:", error);
+      console.error("❌ Error buying ticket:", error);
+      alert("Transaction failed. Check console for details.");
     }
   };
   
