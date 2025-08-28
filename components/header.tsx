@@ -58,7 +58,7 @@ const Header: React.FC = () => {
         ) : (
           <HeaderIcon onClick={connectWallet}>
             <MdOutlineAccountBalanceWallet />
-            <WalletConnect>Connect</WalletConnect>
+            <WalletConnect className="wallet-connect-text">Connect</WalletConnect>
           </HeaderIcon>
         )}
         {showDisconnect && (
@@ -80,13 +80,19 @@ export default Header;
 // Styled Components
 const Wrapper = styled.div`
   background-color: #04111d;
-  width: 100vw;
+  width: 100%;
+  box-sizing: border-box;
   padding: 0.8rem 1.2rem;
   display: flex;
   position: fixed;
   top: 0;
   z-index: 50;
   justify-content: space-between;
+  overflow-x: hidden;
+
+  @media (max-width: 768px) {
+    padding: 0.6rem 0.6rem;
+  }
 `;
 
 const LogoContainer = styled.div`
@@ -100,6 +106,10 @@ const LogoText = styled.div`
   color: white;
   font-weight: 600;
   font-size: 1.6rem;
+
+  @media (max-width: 768px) {
+    font-size: 1.15rem;
+  }
 `;
 
 const SearchBar = styled.div`
@@ -112,6 +122,10 @@ const SearchBar = styled.div`
   border-radius: 0.8rem;
   &:hover {
     background-color: #4c505c;
+  }
+
+  @media (max-width: 768px) {
+    display: none;
   }
 `;
 
@@ -139,7 +153,12 @@ const HeaderItems = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 20px;
+  gap: 16px;
+  max-width: 100%;
+
+  @media (max-width: 768px) {
+    gap: 8px;
+  }
 `;
 
 const HeaderIcon = styled.button`
@@ -161,12 +180,30 @@ const HeaderIcon = styled.button`
   &:hover {
     color: white;
   }
+
+  @media (max-width: 768px) {
+    font-size: 1.8rem;
+    padding: 0 0.25rem;
+    & > svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .wallet-connect-text {
+      display: none; /* hide text label on small screens */
+    }
+  }
 `;
 
 const WalletConnect = styled.span`
   margin-left: 0.5rem;
   font-size: 1.3rem;
   font-weight: bold;
+
+  @media (max-width: 768px) {
+    font-size: 1rem;
+    margin-left: 0.35rem;
+  }
 `;
 
 const WalletAddress = styled.button`
@@ -178,6 +215,14 @@ const WalletAddress = styled.button`
   border: none;
   font-weight: 500;
   margin-left: 0.8rem;
+
+  @media (max-width: 768px) {
+    font-size: 0.9rem;
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 `;
 
 const LogoWrapper = styled.div`
@@ -189,20 +234,32 @@ const LogoWrapper = styled.div`
     transform: scale(2);
     margin-top: 4px;
   }
+
+  @media (max-width: 768px) {
+    width: 28px;
+    height: 28px;
+  }
 `;
 
 const Button = styled.button`
   position: relative;
   font-size: 1.1rem;
   font-weight: 600;
-  padding: 0.75rem 2.2rem;
+  padding: 0.6rem 1.2rem;
   background-color: #2181e2;
   border-radius: 0.5rem;
-  margin-right: 1.25rem;
+  margin-right: 0.5rem;
   color: white;
   cursor: pointer;
+  white-space: nowrap;
   &:hover {
     background-color: #42a0ff;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 0.9rem;
+    padding: 0.45rem 0.8rem;
+    margin-right: 0.25rem;
   }
 `;
 
@@ -217,5 +274,11 @@ const DisconnectOption = styled.button`
   margin-left: 1rem;
   &:hover {
     background: #e60000;
+  }
+
+  @media (max-width: 768px) {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+    margin-left: 0.5rem;
   }
 `;

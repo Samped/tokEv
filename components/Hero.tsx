@@ -22,7 +22,7 @@ const Hero = () => {
         </CtaContainer>
       </TextWrap>
 
-      <Image src={bgImage} alt="Background Image" />
+      <HeroImage src={bgImage} alt="Background Image" />
     </Background>
   );
 };
@@ -39,13 +39,28 @@ const Background = styled.div`
   padding: 0px 100px;
   color: white;
 
-  & > img {
-    width: 65%;
+  @media (max-width: 1024px) {
+    padding: 0 48px;
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    justify-content: center;
+    gap: 24px;
+    height: auto;
+    padding: 100px 16px 40px; /* leave room for fixed header */
+    text-align: center;
   }
 `;
 
 const CtaContainer = styled.div`
   display: flex;
+  gap: 12px;
+
+  @media (max-width: 768px) {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
 `;
 
 const AccentedButton = styled.button`
@@ -60,6 +75,12 @@ const AccentedButton = styled.button`
   cursor: pointer;
   &:hover {
     background-color: #42a0ff;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 1rem;
+    padding: 0.8rem 1.6rem;
+    margin-right: 0;
   }
 `;
 
@@ -76,6 +97,12 @@ const Button = styled.button`
   &:hover {
     background-color: #4c505c;
   }
+
+  @media (max-width: 768px) {
+    font-size: 1rem;
+    padding: 0.8rem 1.6rem;
+    margin-right: 0;
+  }
 `;
 
 const H1 = styled.h1`
@@ -83,6 +110,14 @@ const H1 = styled.h1`
   color: white;
   font-size: 2.875rem;
   font-weight: bold;
+
+  @media (max-width: 1024px) {
+    font-size: 2.25rem;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
 `;
 
 const P = styled.p`
@@ -90,10 +125,43 @@ const P = styled.p`
   font-size: 1.7rem;
   margin-top: 0.8rem;
   margin-bottom: 2.5rem;
+
+  @media (max-width: 1024px) {
+    font-size: 1.3rem;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+    margin-bottom: 1.4rem;
+  }
 `;
 
 const TextWrap = styled.div`
   color: white;
   flex-shrink: 0;
   width: 40%;
+
+  @media (max-width: 1024px) {
+    width: 48%;
+  }
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+`;
+
+const HeroImage = styled(Image)`
+  width: 65%;
+  height: auto;
+
+  @media (max-width: 1024px) {
+    width: 50%;
+  }
+
+  @media (max-width: 768px) {
+    width: 100%;
+    max-width: 520px;
+    opacity: 0.85;
+    border-radius: 12px;
+  }
 `;

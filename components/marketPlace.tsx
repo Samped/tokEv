@@ -34,6 +34,11 @@ const Container = styled.div`
   width: 100%;
   background: white;
   padding: 30px 0 30px;
+
+  @media (max-width: 768px) {
+    height: auto;
+    padding: 24px 16px 40px;
+  }
 `;
 
 const Title = styled.p`
@@ -42,12 +47,24 @@ const Title = styled.p`
   font-weight: 600;
   text-align: center;
   color: #010f1d;
+
+  @media (max-width: 1024px) {
+    font-size: 2.25rem;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 1.8rem;
+  }
 `;
 
 const TxtWrapper = styled.div`
   display: flex;
   flex-direction: column;
   gap: 4px;
+
+  @media (max-width: 768px) {
+    gap: 8px;
+  }
 `;
 
 const SubTitle = styled.p`
@@ -56,6 +73,14 @@ const SubTitle = styled.p`
   font-weight: 300;
   text-align: center;
   color: #010f1d;
+
+  @media (max-width: 1024px) {
+    font-size: 1.2rem;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 1rem;
+  }
 `;
 
 const ButtonWrapper = styled.div`
@@ -75,5 +100,10 @@ const Button = styled.button`
   cursor: pointer;
   &:hover {
     background-color: #42a0ff;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 1rem;
+    padding: 0.8rem 1.6rem;
   }
 `;

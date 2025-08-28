@@ -183,9 +183,23 @@ const GridContainer = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 45px 50px;
-  padding: 130px 80px 60px;
+  padding: 130px 80px 80px; /* extra bottom so blue extends beyond content */
   background-color: #001f3f; // dark blue
   min-height: 100vh;
+  width: 100vw; /* full-bleed */
+  box-sizing: border-box;
+  overflow-x: hidden;
+
+  @media (max-width: 1280px) {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 120px 48px 72px;
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(1, 1fr);
+    gap: 24px;
+    padding: 100px 16px 64px; /* leave room for fixed header */
+  }
 `;
 
 const GridItem = styled.div`
@@ -195,8 +209,9 @@ const GridItem = styled.div`
   overflow: hidden;
   text-align: center;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  width: 500px;
-  height: 400px;
+  width: 100%;
+  max-width: 560px;
+  justify-self: center;
   display: flex;
   flex-direction: column;
 `;
@@ -204,13 +219,17 @@ const GridItem = styled.div`
 const ImageWrapper = styled.div`
   position: relative;
   width: 100%;
-  height: 300px;
+  height: 260px;
   overflow: hidden;
+
+  @media (max-width: 768px) {
+    height: 200px;
+  }
 `;
 
 const EventContent = styled.div`
-  padding: 10px;
-  font-size: 0.8em;
+  padding: 12px;
+  font-size: 0.9em;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -221,22 +240,22 @@ const EventContent = styled.div`
 
 const EventHeader = styled.div`
   h3{
-    font-size: 1.8em;
-    margin-right: 20px;
+    font-size: 1.4em;
+    margin-right: 12px;
   },
   p {
     margin: 0;
-    font-size: 1em;
+    font-size: 0.95em;
     font-weight: bold;
     padding: 1px -20px;
-    margin-right: 20px;
+    margin-right: 12px;
   }
 `;
 
 const Input = styled.input`
   padding: 6px;
   font-size: 0.9em; /* Slightly smaller font size */
-  width: 100px; /* Set a fixed width for the input field */
+  width: 110px; /* Set a fixed width for the input field */
   margin-top: 20px;
   border-radius: 4px;
   background-color: rgb(214, 223, 233);

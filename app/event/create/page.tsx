@@ -186,14 +186,16 @@ const CreateForm = () => {
           <Label htmlFor="numOfTickets">Number of Tickets</Label>
           <Input type="number" id="numOfTickets" onChange={handleChange} />
         </FormGroup>
-        <FormGroup>
-          <Label htmlFor="date">Date</Label>
-          <Input type="date" id="date" onChange={handleChange} />
-        </FormGroup>
-        <FormGroup>
-          <Label htmlFor="time">Time</Label>
-          <Input type="time" id="time" onChange={handleChange} />
-        </FormGroup>
+        <Row>
+          <FormGroup style={{ flex: 1 }}>
+            <Label htmlFor="date">Date</Label>
+            <Input type="date" id="date" onChange={handleChange} />
+          </FormGroup>
+          <FormGroup style={{ flex: 1 }}>
+            <Label htmlFor="time">Time</Label>
+            <Input type="time" id="time" onChange={handleChange} />
+          </FormGroup>
+        </Row>
         <FormGroup>
           <Label htmlFor="location">Location</Label>
           <Input type="text" id="location" onChange={handleChange} />
@@ -220,6 +222,11 @@ const Container = styled.div`
   align-items: center;
   gap: 20px;
   margin: 140px auto 40px;
+  padding: 0 16px;
+
+  @media (max-width: 768px) {
+    margin: 100px auto 24px;
+  }
 `;
 
 const Form = styled.form`
@@ -229,6 +236,26 @@ const Form = styled.form`
   border: 1px solid #ccc;
   border-radius: 8px;
   background-color: #f9f9f9;
+
+  @media (max-width: 1024px) {
+    width: 60%;
+  }
+
+  @media (max-width: 768px) {
+    width: 100%;
+    max-width: 520px;
+    padding: 16px;
+  }
+`;
+
+const Row = styled.div`
+  display: flex;
+  gap: 12px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0;
+  }
 `;
 
 const FormGroup = styled.div`
@@ -247,6 +274,11 @@ const Input = styled.input`
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
+
+  @media (max-width: 768px) {
+    padding: 12px;
+    font-size: 16px; /* better tap targets */
+  }
 `;
 
 const Button = styled.button`
@@ -261,11 +293,20 @@ const Button = styled.button`
   &:hover {
     background-color: #0056b3;
   }
+
+  @media (max-width: 768px) {
+    padding: 12px;
+    font-size: 16px;
+  }
 `;
 
 const H1 = styled.h1`
   position: relative;
   font-size: 2.875rem;
   font-weight: bold;
+
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
 `;
 

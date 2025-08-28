@@ -14,10 +14,10 @@ const EventCard: FC<props> = ({ image, title, description }) => {
 
   return (
     <GridItem>
-      <Image src={image} alt={title} />
-      <h3>{title}</h3>
-      <p>{description}</p>
-      <button onClick={() => push("/event")}>Participate</button>
+      <CardImage src={image} alt={title} />
+      <Title>{title}</Title>
+      <Desc>{description}</Desc>
+      <PrimaryButton onClick={() => push("/event")}>Participate</PrimaryButton>
     </GridItem>
   );
 };
@@ -32,33 +32,52 @@ const GridItem = styled.div`
   text-align: center;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 
-  img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 4px;
+  @media (max-width: 768px) {
+    padding: 12px;
+  }
+`;
+
+const CardImage = styled(Image)`
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+`;
+
+const Title = styled.h3`
+  font-size: 1.2em;
+  margin: 10px 0;
+
+  @media (max-width: 768px) {
+    font-size: 1.05rem;
+    margin: 8px 0;
+  }
+`;
+
+const Desc = styled.p`
+  font-size: 1em;
+  color: #333;
+  min-height: 2.5em;
+
+  @media (max-width: 768px) {
+    font-size: 0.95rem;
+  }
+`;
+
+const PrimaryButton = styled.button`
+  background-color: #0070f3;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+
+  &:hover {
+    background-color: #005bb5;
   }
 
-  h3 {
-    font-size: 1.2em;
-    margin: 10px 0;
-  }
-
-  p {
-    font-size: 1em;
-    color: #333;
-  }
-
-  button {
-    background-color: #0070f3;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-top: 10px;
-
-    &:hover {
-      background-color: #005bb5;
-    }
+  @media (max-width: 768px) {
+    padding: 10px 16px;
+    font-size: 0.95rem;
   }
 `;
