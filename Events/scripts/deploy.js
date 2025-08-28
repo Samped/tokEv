@@ -2,7 +2,7 @@ const { ethers } = require('hardhat');
 require('dotenv').config();
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
-const RPC_URL = 'https://tea-sepolia.g.alchemy.com/public';  // TEA Protocol RPC URL
+const RPC_URL = 'https://testnet.rpc.intuition.systems/http';  // INTUTION RPC URL
 
 async function main() {
   if (!PRIVATE_KEY) {

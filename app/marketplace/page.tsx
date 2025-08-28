@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useWallet } from "../hooks/useWallet"; // Import the custom hook
+import { useWallet } from "../hooks/WalletProvider"; // Import from WalletProvider
 import { ethers } from "ethers";
 import { Interface } from "@ethersproject/abi";
 import abi from "../src/abi/eventTicketing.json";
@@ -87,7 +87,7 @@ const Marketplace = () => {
   
       // ✅ Estimate gas with value included
       const estimatedGas = await signer.estimateGas({
-        to: "0x14A09cdE2841385079608F16FDF71569138F554F",
+        to: "0xcc5661D1471e9e61B37Df5Ad5D2E1B2C5578c884",
         data: encodedData,
         value,
       });
@@ -97,7 +97,7 @@ const Marketplace = () => {
   
       // ✅ Send the transaction with correct value
       const tx = await signer.sendTransaction({
-        to: "0x14A09cdE2841385079608F16FDF71569138F554F",
+        to: "0xcc5661D1471e9e61B37Df5Ad5D2E1B2C5578c884",
         data: encodedData,
         gasLimit: adjustedGasLimit,
         maxFeePerGas: feeData.maxFeePerGas?.add(ethers.BigNumber.from("1000000000")),
@@ -135,7 +135,7 @@ const Marketplace = () => {
           <EventContent>
             <EventHeader>
               <h3>{event.name.toUpperCase()}</h3>
-              <p>Price: {event.cost} eTEA</p>
+              <p>Price: {event.cost} TTrust</p> {/* Currency: TTrust */}
               <p>Event ID: {event.id}</p> {/* Display Event ID here */}
             </EventHeader>
             {visibleDescriptions.has(event.id) && (

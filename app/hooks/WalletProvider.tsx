@@ -1,10 +1,11 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { createWalletClient, custom } from 'viem';
-import { teaSepolia } from '../chains/teaSepolia'
+import { INTUTION } from '../chains/INTUTION'
 
 interface WalletContextType {
   account: string | null;
   walletClient: any | null;
+  signer: any | null;
   connectWallet: () => Promise<void>;
 }
 
@@ -21,6 +22,7 @@ export const useWallet = () => {
 export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [account, setAccount] = useState<string | null>(null);
   const [walletClient, setWalletClient] = useState<any>(null);
+  const [signer, setSigner] = useState<any>(null);
 
   useEffect(() => {
     // Check if the user is already connected
@@ -30,10 +32,20 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         if (accounts.length > 0) {
           setAccount(accounts[0]);
           const walletClientInstance = createWalletClient({
-            chain: teaSepolia,
+            chain: INTUTION,
             transport: custom(window.ethereum),
           });
           setWalletClient(walletClientInstance);
+          
+          // Create a signer for ethers.js compatibility
+          try {
+            const { ethers } = await import('ethers');
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const signerInstance = provider.getSigner();
+            setSigner(signerInstance);
+          } catch (error) {
+            console.error("Failed to create ethers signer:", error);
+          }
         }
       }
     };
@@ -47,10 +59,20 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setAccount(accounts[0]);
 
         const walletClientInstance = createWalletClient({
-          chain: teaSepolia,
+          chain: INTUTION,
           transport: custom(window.ethereum),
         });
         setWalletClient(walletClientInstance);
+        
+        // Create a signer for ethers.js compatibility
+        try {
+          const { ethers } = await import('ethers');
+          const provider = new ethers.providers.Web3Provider(window.ethereum);
+          const signerInstance = provider.getSigner();
+          setSigner(signerInstance);
+        } catch (error) {
+          console.error("Failed to create ethers signer:", error);
+        }
       } catch (error) {
         console.error("Error connecting to wallet:", error);
       }
@@ -60,8 +82,8 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   };
 
   return (
-    <WalletContext.Provider value={{ account, walletClient, connectWallet }}>
+    <WalletContext.Provider value={{ account, walletClient, signer, connectWallet }}>
       {children}
     </WalletContext.Provider>
   );
-};
+}; 

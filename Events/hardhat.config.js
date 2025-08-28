@@ -5,23 +5,23 @@ require("dotenv").config();
 module.exports = {
   solidity: "0.8.20",
   networks: {
-    tea_sepolia: {
-      url: "https://tea-sepolia.g.alchemy.com/public", 
-      chainId: 10218, 
-      accounts: [process.env.PRIVATE_KEY], 
+    INTUTION: {
+      url: "https://testnet.rpc.intuition.systems/http", 
+      chainId: 13579, 
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],      
     },
   },
   etherscan: {
     apiKey: {
-      tea_sepolia: process.env.ETHERSCAN_API_KEY, 
+      'intuition-testnet': 'empty'
     },
     customChains: [
       {
-        network: "tea_sepolia", 
-        chainId: 10218,
+        network: "intuition-testnet", 
+        chainId: 13579,
         urls: {
-          apiURL: "https://sepolia.tea.xyz/api",
-          browserURL: "https://sepolia.tea.xyz",
+          apiURL: "https://intuition-testnet.explorer.caldera.xyz/api",
+          browserURL: "https://intuition-testnet.explorer.caldera.xyz"
             
         },
       },

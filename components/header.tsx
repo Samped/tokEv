@@ -9,7 +9,7 @@ import { AiOutlineSearch } from "react-icons/ai";
 import { CgProfile } from "react-icons/cg";
 import { MdOutlineAccountBalanceWallet } from "react-icons/md";
 import { usePathname, useRouter } from "next/navigation";
-import { useWallet } from "@/app/hooks/useWallet";
+import { useWallet } from "@/app/hooks/WalletProvider";
 
 const Header: React.FC = () => {
   const pathname = usePathname();
@@ -17,7 +17,12 @@ const Header: React.FC = () => {
   const marketPlaceUrl = "/marketplace";
 
     // Access the wallet state from context
-    const { account, connectWallet, disconnectWallet } = useWallet();
+    const { account, connectWallet } = useWallet();
+    
+    // Add disconnect functionality
+    const disconnectWallet = () => {
+      window.location.reload();
+    };
     const [showDisconnect, setShowDisconnect] = useState(false);
   
     const handleWalletClick = () => {
