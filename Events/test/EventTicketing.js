@@ -2,7 +2,7 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
 const NAME = "Concert"
-const SYMBOL = "Con"
+const SYMBOL = "con"
 
 const OCCASION_NAME = "Enugu Tech meet-up"
 const OCCASION_PICTURE = "image-url"

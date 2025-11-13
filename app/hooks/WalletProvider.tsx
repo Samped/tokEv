@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { createWalletClient, custom } from 'viem';
-import { INTUTION } from '../chains/INTUTION'
+import { teaSepolia } from '../chains/tea'
 
 interface WalletContextType {
   account: string | null;
@@ -24,30 +24,30 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [walletClient, setWalletClient] = useState<any>(null);
   const [signer, setSigner] = useState<any>(null);
 
-  // Parameters for adding/switching to INTUTION network in injected wallets (e.g., MetaMask)
-  const INTUTION_PARAMS = {
-    chainId: '0x350b', // 13579 in hex
-    chainName: 'INTUTION',
+  // Parameters for adding/switching to TEA network in injected wallets (e.g., MetaMask)
+  const TEA_PARAMS = {
+    chainId: '0x27EA', // 10218 in hex
+    chainName: 'Tea Sepolia',
     nativeCurrency: {
-      name: 'INTUTION',
-      symbol: 'TTRUST',
+      name: 'TEA',
+      symbol: 'TEA',
       decimals: 18,
     },
-    rpcUrls: ['https://testnet.rpc.intuition.systems/http'],
-    blockExplorerUrls: ['https://testnet.explorer.intuition.systems'],
+    rpcUrls: ['https://tea-sepolia.g.alchemy.com/v2/LFkRjWuldpkEX6hFz3Eur-17c7gqRZxv'],
+    blockExplorerUrls: ['https://sepolia.tea.xyz'],
   } as const;
 
-  const ensureIntutionNetwork = async (): Promise<boolean> => {
+  const ensureTeaNetwork = async (): Promise<boolean> => {
     try {
       if (!window.ethereum) return false;
       const currentChainId = await window.ethereum.request({ method: 'eth_chainId' });
-      if ((currentChainId as string)?.toLowerCase() === INTUTION_PARAMS.chainId) {
+      if ((currentChainId as string)?.toLowerCase() === TEA_PARAMS.chainId) {
         return true;
       }
       try {
         await window.ethereum.request({
           method: 'wallet_switchEthereumChain',
-          params: [{ chainId: INTUTION_PARAMS.chainId }],
+          params: [{ chainId: TEA_PARAMS.chainId }],
         });
         return true;
       } catch (switchError: any) {
@@ -55,12 +55,12 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         if (code === 4902) {
           await window.ethereum.request({
             method: 'wallet_addEthereumChain',
-            params: [INTUTION_PARAMS],
+            params: [TEA_PARAMS],
           });
           // After adding, attempt to switch again
           await window.ethereum.request({
             method: 'wallet_switchEthereumChain',
-            params: [{ chainId: INTUTION_PARAMS.chainId }],
+            params: [{ chainId: TEA_PARAMS.chainId }],
           });
           return true;
         }
@@ -71,7 +71,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         throw switchError;
       }
     } catch (error) {
-      console.error('Failed to switch/add INTUTION network:', error);
+      console.error('Failed to switch/add TEA network:', error);
       return false;
     }
   };
@@ -80,7 +80,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setAccount(selectedAccount);
 
     const walletClientInstance = createWalletClient({
-      chain: INTUTION,
+      chain: teaSepolia,
       transport: custom(window.ethereum),
     });
     setWalletClient(walletClientInstance);
@@ -101,7 +101,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       if (window.ethereum) {
         const accounts = await window.ethereum.request({ method: "eth_accounts" });
         if (accounts.length > 0) {
-          const onCorrectNetwork = await ensureIntutionNetwork();
+          const onCorrectNetwork = await ensureTeaNetwork();
           if (!onCorrectNetwork) {
             return;
           }
@@ -110,7 +110,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
         // Listen for network changes
         const handleChainChanged = async () => {
-          const ok = await ensureIntutionNetwork();
+          const ok = await ensureTeaNetwork();
           if (!ok) {
             setAccount(null);
             setWalletClient(null);
@@ -130,7 +130,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             setSigner(null);
             return;
           }
-          const ok = await ensureIntutionNetwork();
+          const ok = await ensureTeaNetwork();
           if (!ok) return;
           await setupClients(accs[0]);
         };
@@ -153,10 +153,10 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         // First, request account access so the dapp is authorized to prompt network actions
         const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
 
-        // Then, enforce INTUTION network
-        const onCorrectNetwork = await ensureIntutionNetwork();
+        // Then, enforce TEA network
+        const onCorrectNetwork = await ensureTeaNetwork();
         if (!onCorrectNetwork) {
-          alert('Please switch to the INTUTION network in your wallet to continue.');
+          alert('Please switch to the TEA network in your wallet to continue.');
           return;
         }
 

@@ -12,22 +12,61 @@ const Marketplace = () => {
   const [events, setEvents] = useState<any[]>([]);
   const [visibleDescriptions, setVisibleDescriptions] = useState<Set<number>>(new Set());
   const [seatNumbers, setSeatNumbers] = useState<Record<number, number | null>>({});
+  const [takenSeats, setTakenSeats] = useState<Record<number, number[]>>({});
+  const [availableSeats, setAvailableSeats] = useState<Record<number, number[]>>({});
   const { push } = useRouter();
   const { account, signer } = useWallet();
+  const CONTRACT_ADDRESS = "0x14A09cdE2841385079608F16FDF71569138F554F";
+
+  // Fetch taken seats for an event
+  const fetchTakenSeats = async (eventId: number, maxTickets: number) => {
+    if (!signer) return;
+    
+    try {
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, signer);
+      const taken = await contract.getSeatsTaken(eventId);
+      const takenArray = taken.map((seat: any) => Number(seat.toString()));
+      
+      setTakenSeats(prev => ({
+        ...prev,
+        [eventId]: takenArray
+      }));
+
+      // Calculate available seats
+      const allSeats = Array.from({ length: maxTickets }, (_, i) => i + 1);
+      const available = allSeats.filter(seat => !takenArray.includes(seat));
+      setAvailableSeats(prev => ({
+        ...prev,
+        [eventId]: available
+      }));
+    } catch (error) {
+      console.error(`Error fetching taken seats for event ${eventId}:`, error);
+    }
+  };
 
   // Fetch events from API (or your database)
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await fetch("/api/get-events"); // This can be a call to your backend API
+        const response = await fetch("/api/get-events");
         const data = await response.json();
-        setEvents(data); // Assume data has fields like event.id, event.name, event.cost (price)
+        setEvents(data);
+        
+        // Fetch taken seats for each event
+        if (signer) {
+          data.forEach((event: any) => {
+            if (event.numOfTickets) {
+              fetchTakenSeats(event.id, event.numOfTickets);
+            }
+          });
+        }
       } catch (error) {
         console.error("Error fetching events:", error);
       }
     };
     fetchEvents();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signer]);
 
   const handleDescriptionToggle = (id: number) => {
     setVisibleDescriptions(prev => {
@@ -87,17 +126,17 @@ const Marketplace = () => {
   
       // ✅ Estimate gas with value included
       const estimatedGas = await signer.estimateGas({
-        to: "0xcc5661D1471e9e61B37Df5Ad5D2E1B2C5578c884",
+        to: CONTRACT_ADDRESS,
         data: encodedData,
         value,
       });
-  
+
       const feeData = await signer.getFeeData();
       const adjustedGasLimit = estimatedGas.add(ethers.BigNumber.from("10000")); // Add buffer
-  
+
       // ✅ Send the transaction with correct value
       const tx = await signer.sendTransaction({
-        to: "0xcc5661D1471e9e61B37Df5Ad5D2E1B2C5578c884",
+        to: CONTRACT_ADDRESS,
         data: encodedData,
         gasLimit: adjustedGasLimit,
         maxFeePerGas: feeData.maxFeePerGas?.add(ethers.BigNumber.from("1000000000")),
@@ -110,9 +149,38 @@ const Marketplace = () => {
       const receipt = await tx.wait();
       console.log("🎉 Ticket purchased successfully!", receipt);
       alert("Ticket purchased successfully!");
-    } catch (error) {
+    } catch (error: any) {
       console.error("❌ Error buying ticket:", error);
-      alert("Transaction failed. Check console for details.");
+      
+      // Check if error is about seat already taken
+      const errorMessage = error?.message || error?.error?.message || error?.data?.message || "";
+      const errorString = errorMessage.toString().toLowerCase();
+      
+      if (errorString.includes("seat already taken") || errorString.includes("seat already")) {
+        // Fetch updated taken seats
+        const event = events.find(e => e.id === eventId);
+        if (event?.numOfTickets) {
+          await fetchTakenSeats(eventId, event.numOfTickets);
+        }
+        
+        const available = availableSeats[eventId] || [];
+        const taken = takenSeats[eventId] || [];
+        
+        let message = "Seat already taken!\n\n";
+        
+        if (available.length > 0) {
+          const availablePreview = available.slice(0, 20).join(", ");
+          const moreText = available.length > 20 ? ` and ${available.length - 20} more` : "";
+          message += `Available seats: ${availablePreview}${moreText}\n`;
+          message += `(Total available: ${available.length} of ${event?.numOfTickets || 'N/A'})`;
+        } else {
+          message += "No seats available. All seats are taken.";
+        }
+        
+        alert(message);
+      } else {
+        alert(`Transaction failed: ${errorMessage || "Check console for details."}`);
+      }
     }
   };
   
@@ -135,7 +203,7 @@ const Marketplace = () => {
           <EventContent>
             <EventHeader>
               <h3>{event.name.toUpperCase()}</h3>
-              <p>Price: {event.cost} TTrust</p> {/* Currency: TTrust */}
+              <p>Price: {event.cost} Tea</p> {/* Currency: Tea */}
               <p>Event ID: {event.id}</p> {/* Display Event ID here */}
             </EventHeader>
             {visibleDescriptions.has(event.id) && (
@@ -143,12 +211,19 @@ const Marketplace = () => {
             )}
             
             {/* Input field for seat number specific to each event */}
-            <Input
-              type="number"
-              placeholder="Enter Seat Number"
-              value={seatNumbers[event.id] || ""}
-              onChange={(e) => handleSeatNumberChange(event.id, Number(e.target.value))}
-            />
+            <SeatInputWrapper>
+              <Input
+                type="number"
+                placeholder="Enter Seat Number"
+                value={seatNumbers[event.id] || ""}
+                onChange={(e) => handleSeatNumberChange(event.id, Number(e.target.value))}
+              />
+              {availableSeats[event.id] && availableSeats[event.id].length > 0 && (
+                <AvailableSeatsInfo>
+                  {availableSeats[event.id].length} seats available
+                </AvailableSeatsInfo>
+              )}
+            </SeatInputWrapper>
 
             {/* Toggle Button for showing event description */}
             <ToggleButton onClick={() => handleDescriptionToggle(event.id)}>
@@ -295,4 +370,19 @@ const ToggleButton = styled.button`
   &:hover {
     text-decoration: underline;
   }
+`;
+
+const SeatInputWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: 10px;
+`;
+
+const AvailableSeatsInfo = styled.p`
+  font-size: 0.75em;
+  color: #28a745;
+  margin: 0;
+  font-weight: 600;
 `;
